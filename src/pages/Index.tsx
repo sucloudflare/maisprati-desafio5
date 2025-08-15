@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Film, Play, Search as SearchIcon } from "lucide-react";
-import { motion } from "framer-motion";
+import { Film, Play } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Movie } from "@/types/movie";
 import { tmdbApi } from "@/services/tmdbApi";
 import { SearchBar } from "@/components/SearchBar";
@@ -9,7 +9,15 @@ import { MovieCard } from "@/components/MovieCard";
 import { Pagination } from "@/components/Pagination";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
-import heroBanner from "@/assets/hero-banner.jpg";
+
+// Imagens do carrossel de filmes de sucesso
+const heroBanners = [
+  "https://www.themoviedb.org/t/p/original/6KErczPBROQty7QoIsaa6wJYXZi.jpg",
+  "https://www.themoviedb.org/t/p/original/3iYQTLGoy7QnjcUYRJy4YrAgGvp.jpg",
+  "https://www.themoviedb.org/t/p/original/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
+  "https://www.themoviedb.org/t/p/original/2CAL2433ZeIihfX1Hb2139CX0pW.jpg",
+  "https://www.themoviedb.org/t/p/original/q719jXXEzOoYaps6babgKnONONX.jpg",
+];
 
 const Index = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -18,7 +26,16 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [currentBanner, setCurrentBanner] = useState(0);
   const navigate = useNavigate();
+
+  // Troca automática do banner
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % heroBanners.length);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadPopularMovies = async () => {
     try {
@@ -37,16 +54,18 @@ const Index = () => {
     }
   };
 
+  useEffect(() => {
+    loadPopularMovies();
+  }, []);
+
   const handleSearch = async (query: string) => {
     try {
       setIsLoading(true);
       setError(null);
       const response = await tmdbApi.searchMovies(query, 1);
-
       if (response.results.length === 0) {
         setError(`Nenhum resultado encontrado para "${query}"`);
       }
-
       setMovies(response.results);
       setTotalPages(Math.min(response.total_pages, 500));
       setCurrentPage(1);
@@ -81,43 +100,47 @@ const Index = () => {
     navigate(`/movie/${movieId}`);
   };
 
-  useEffect(() => {
-    loadPopularMovies();
-  }, []);
-
   return (
     <div className="min-h-screen bg-background text-white">
       {/* HERO */}
       <div className="relative min-h-screen overflow-hidden">
-        {/* Banner animado */}
-        <motion.div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroBanner})` }}
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 25, repeat: Infinity }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-
-        {/* Hero Content */}
-        <div className="relative z-10 container mx-auto px-4 py-20 flex flex-col justify-center min-h-screen text-center">
+        <AnimatePresence>
           <motion.div
-            className="flex flex-col items-center"
-            initial={{ opacity: 0, y: 40 }}
+            key={currentBanner}
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${heroBanners[currentBanner]})` }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, scale: 1.05 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5 }}
+          />
+        </AnimatePresence>
+
+        {/* Overlay escuro e blur */}
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+
+        {/* Conteúdo centralizado */}
+        <div className="relative z-10 container mx-auto px-8 py-24 flex flex-col justify-center min-h-screen text-center">
+          <motion.div
+            className="flex flex-col items-center gap-6"
+            initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 1.2 }}
           >
-            <Film className="w-20 h-20 text-red-600 drop-shadow-lg mb-6" />
-            <h1 className="text-6xl font-extrabold tracking-wider drop-shadow-xl">
-              BRUNÃO
+            <Film className="w-24 h-24 text-yellow-400 drop-shadow-2xl animate-bounce" />
+
+            <h1 className="text-7xl md:text-8xl font-extrabold tracking-tight text-gradient-to-r from-yellow-400 to-red-500 drop-shadow-2xl">
+              CINEMA ÉPICO
             </h1>
-            <p className="text-2xl max-w-3xl mx-auto mt-4 text-white/90">
-              O cinema nunca foi tão épico. Explore milhares de filmes, séries e documentários.
+
+            <p className="text-2xl md:text-3xl max-w-4xl mx-auto mt-4 text-white/90 font-semibold drop-shadow-lg">
+              Explore os maiores sucessos do cinema com carrossel animado e efeitos incríveis!
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 mt-10">
               <Button
                 size="lg"
-                className="bg-red-600 hover:scale-105 transition-transform font-bold px-8 py-4 text-lg shadow-lg"
+                className="bg-gradient-to-r from-yellow-400 to-red-500 hover:scale-105 transform transition-all font-bold px-10 py-5 text-lg shadow-2xl text-black"
                 onClick={() =>
                   window.scrollTo({ top: window.innerHeight, behavior: "smooth" })
                 }
@@ -127,19 +150,18 @@ const Index = () => {
             </div>
           </motion.div>
 
-          {/* Barra de busca */}
           <motion.div
             className="mt-12 w-full max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.7 }}
           >
             <SearchBar onSearch={handleSearch} isLoading={isLoading} />
           </motion.div>
         </div>
       </div>
 
-      {/* Lista de Filmes */}
+      {/* Lista de filmes */}
       <div className="container mx-auto px-4 py-16">
         {isLoading && <LoadingSpinner size="lg" text="Carregando filmes..." />}
         {error && <p className="text-red-500 text-center mb-6">{error}</p>}

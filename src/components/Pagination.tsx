@@ -24,18 +24,20 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-3 mt-12">
+    <div className="flex flex-wrap items-center justify-center gap-3 mt-12">
+      {/* Botão Anterior */}
       <Button
         variant="outline"
         size="lg"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="border-netflix-red/40 text-netflix-white hover:bg-netflix-red/20 font-semibold px-6"
+        className="border-gradient-red/40 text-white hover:bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 hover:shadow-[0_0_15px_rgba(255,69,0,0.5)] font-semibold px-6 transition-all duration-300"
       >
-        <ChevronLeft className="h-5 w-5" />
+        <ChevronLeft className="h-5 w-5 mr-1" />
         Anterior
       </Button>
 
+      {/* Páginas */}
       <div className="flex gap-2">
         {currentPage > 3 && (
           <>
@@ -43,25 +45,25 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
               variant="outline"
               size="lg"
               onClick={() => onPageChange(1)}
-              className="border-netflix-red/40 text-netflix-white hover:bg-netflix-red/20 font-semibold"
+              className="border-gradient-red/40 text-white hover:bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 font-semibold transition-all duration-300"
             >
               1
             </Button>
-            {currentPage > 4 && <span className="px-2 text-netflix-white/60 flex items-center">...</span>}
+            {currentPage > 4 && <span className="px-2 text-white/60 flex items-center select-none">...</span>}
           </>
         )}
 
         {getVisiblePages().map((page) => (
           <Button
             key={page}
-            variant={page === currentPage ? "default" : "outline"}
+            variant={page === currentPage ? 'default' : 'outline'}
             size="lg"
             onClick={() => onPageChange(page)}
-            className={
+            className={`transition-all duration-300 font-semibold px-5 ${
               page === currentPage
-                ? "bg-gradient-red hover:shadow-glow-red font-bold"
-                : "border-netflix-red/40 text-netflix-white hover:bg-netflix-red/20 font-semibold"
-            }
+                ? 'bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-black shadow-glow-red transform scale-105'
+                : 'border-gradient-red/40 text-white hover:bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 hover:shadow-[0_0_10px_rgba(255,69,0,0.4)]'
+            }`}
           >
             {page}
           </Button>
@@ -69,12 +71,12 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
 
         {currentPage < totalPages - 2 && (
           <>
-            {currentPage < totalPages - 3 && <span className="px-2 text-netflix-white/60 flex items-center">...</span>}
+            {currentPage < totalPages - 3 && <span className="px-2 text-white/60 flex items-center select-none">...</span>}
             <Button
               variant="outline"
               size="lg"
               onClick={() => onPageChange(totalPages)}
-              className="border-netflix-red/40 text-netflix-white hover:bg-netflix-red/20 font-semibold"
+              className="border-gradient-red/40 text-white hover:bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 font-semibold transition-all duration-300"
             >
               {totalPages}
             </Button>
@@ -82,15 +84,16 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
         )}
       </div>
 
+      {/* Botão Próxima */}
       <Button
         variant="outline"
         size="lg"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="border-netflix-red/40 text-netflix-white hover:bg-netflix-red/20 font-semibold px-6"
+        className="border-gradient-red/40 text-white hover:bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 hover:shadow-[0_0_15px_rgba(255,69,0,0.5)] font-semibold px-6 transition-all duration-300"
       >
         Próxima
-        <ChevronRight className="h-5 w-5" />
+        <ChevronRight className="h-5 w-5 ml-1" />
       </Button>
     </div>
   );
