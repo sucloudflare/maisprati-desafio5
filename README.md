@@ -3,6 +3,7 @@
   <p>
     <strong>Epic Movies</strong> é uma aplicação React inspirada no estilo Netflix, que permite explorar filmes populares, buscar por títulos, visualizar detalhes e navegar por uma interface moderna e cinematográfica. Possui banner rotativo, animações e carregamento infinito de filmes.
   </p>
+<a href="https://maisprati-desafio5.vercel.app/">link do site</a>
 
   <h2>🖥️ Demonstração</h2>
   <ul>
@@ -89,3 +90,4 @@ cd epic-movies</pre>
 
   <h2>📜 Licença</h2>
   <p>Este projeto é <strong>open-source</strong> e gratuito para estudo e aprendizado.</p>
+
