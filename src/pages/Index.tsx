@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Film, Heart, Search as SearchIcon, Play } from "lucide-react";
+import { Film, Play, Search as SearchIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { Movie } from "@/types/movie";
 import { tmdbApi } from "@/services/tmdbApi";
-import { favoritesService } from "@/services/favorites";
 import { SearchBar } from "@/components/SearchBar";
 import { MovieCard } from "@/components/MovieCard";
 import { Pagination } from "@/components/Pagination";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import heroBanner from "@/assets/hero-banner.jpg";
 
 const Index = () => {
@@ -20,14 +18,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [favorites, setFavorites] = useState<number[]>([]);
   const navigate = useNavigate();
-  const { toast } = useToast();
-
-  const loadFavorites = () => {
-    const favoriteMovies = favoritesService.getFavorites();
-    setFavorites(favoriteMovies.map((movie) => movie.id));
-  };
 
   const loadPopularMovies = async () => {
     try {
@@ -53,10 +44,7 @@ const Index = () => {
       const response = await tmdbApi.searchMovies(query, 1);
 
       if (response.results.length === 0) {
-        toast({
-          title: "Nenhum resultado encontrado",
-          description: `Não foram encontrados filmes para "${query}"`,
-        });
+        setError(`Nenhum resultado encontrado para "${query}"`);
       }
 
       setMovies(response.results);
@@ -95,46 +83,22 @@ const Index = () => {
 
   useEffect(() => {
     loadPopularMovies();
-    loadFavorites();
   }, []);
 
   return (
     <div className="min-h-screen bg-background text-white">
       {/* HERO */}
       <div className="relative min-h-screen overflow-hidden">
+        {/* Banner animado */}
         <motion.div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${heroBanner})` }}
-          animate={{ scale: [1, 1.1] }}
-          transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 25, repeat: Infinity }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-        {/* Partículas animadas */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="w-1 h-1 bg-red-500 rounded-full absolute"
-              initial={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                opacity: 0,
-              }}
-              animate={{
-                y: [0, -50],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: 4 + Math.random() * 3,
-                repeat: Infinity,
-                delay: Math.random() * 5,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Conteúdo Hero */}
+        {/* Hero Content */}
         <div className="relative z-10 container mx-auto px-4 py-20 flex flex-col justify-center min-h-screen text-center">
           <motion.div
             className="flex flex-col items-center"
@@ -147,8 +111,7 @@ const Index = () => {
               BRUNÃO
             </h1>
             <p className="text-2xl max-w-3xl mx-auto mt-4 text-white/90">
-              O cinema nunca foi tão épico. Mergulhe em milhares de filmes e
-              séries.
+              O cinema nunca foi tão épico. Explore milhares de filmes, séries e documentários.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 mt-10">
@@ -160,14 +123,6 @@ const Index = () => {
                 }
               >
                 <Play className="w-6 h-6 mr-2" /> Explorar Agora
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-2 border-white hover:bg-white hover:text-black font-bold px-8 py-4 text-lg"
-                onClick={() => navigate("/favorites")}
-              >
-                <Heart className="w-6 h-6 mr-2" /> Meus Favoritos ({favorites.length})
               </Button>
             </div>
           </motion.div>
@@ -184,10 +139,10 @@ const Index = () => {
         </div>
       </div>
 
-      {/* LISTA DE FILMES */}
+      {/* Lista de Filmes */}
       <div className="container mx-auto px-4 py-16">
         {isLoading && <LoadingSpinner size="lg" text="Carregando filmes..." />}
-        {error && <p className="text-red-500 text-center">{error}</p>}
+        {error && <p className="text-red-500 text-center mb-6">{error}</p>}
 
         {!isLoading && !error && movies.length > 0 && (
           <>
@@ -203,15 +158,10 @@ const Index = () => {
               {movies.map((movie) => (
                 <motion.div
                   key={movie.id}
-                  whileHover={{ scale: 1.05, rotateY: 5 }}
+                  whileHover={{ scale: 1.05, rotateY: 3 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <MovieCard
-                    movie={movie}
-                    onViewDetails={handleViewDetails}
-                    isFavorite={favorites.includes(movie.id)}
-                    onFavoriteChange={loadFavorites}
-                  />
+                  <MovieCard movie={movie} onViewDetails={handleViewDetails} />
                 </motion.div>
               ))}
             </motion.div>
